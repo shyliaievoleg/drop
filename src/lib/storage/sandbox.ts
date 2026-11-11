@@ -13,11 +13,11 @@
 export interface SandboxFlags {
   /** Access cookies, localStorage, same-origin fetch. Default ON. */
   allowSameOrigin: boolean
-  /** alert(), confirm(), prompt(). Default ON. */
+  /** alert(), confirm(), prompt(). Default OFF. */
   allowModals: boolean
-  /** Submit forms. Default ON. */
+  /** Submit forms. Default OFF. */
   allowForms: boolean
-  /** window.open(), target="_blank" links. Default ON. */
+  /** window.open(), target="_blank" links. Default OFF. */
   allowPopups: boolean
   /** Trigger file downloads (Chrome). Default OFF. */
   allowDownloads: boolean
@@ -33,9 +33,9 @@ export interface SandboxFlags {
 
 export const DEFAULT_SANDBOX_FLAGS: SandboxFlags = {
   allowSameOrigin: true,
-  allowModals: true,
-  allowForms: true,
-  allowPopups: true,
+  allowModals: false,
+  allowForms: false,
+  allowPopups: false,
   allowDownloads: false,
   allowPopupsToEscape: false,
   allowPointerLock: false,
