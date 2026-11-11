@@ -33,7 +33,7 @@ export function ConfigBadge({
           <button
             onClick={onOpenSettings}
             className="focus:outline-none"
-            aria-label="Настройки подключения"
+            aria-label="Connection settings"
           >
             <Badge
               variant="secondary"
@@ -48,7 +48,7 @@ export function ConfigBadge({
               ) : (
                 <AlertTriangle className="h-3.5 w-3.5" />
               )}
-              {configured ? LABELS[config!.provider] : "Не настроено"}
+              {configured ? LABELS[config!.provider] : "Not configured"}
               <Settings2 className="h-3 w-3 opacity-60" />
             </Badge>
           </button>
@@ -56,8 +56,8 @@ export function ConfigBadge({
         <TooltipContent side="bottom" className="max-w-xs">
           <p className="text-xs leading-relaxed">
             {configured
-              ? `Активный провайдер: ${LABELS[config!.provider]}. Кликни, чтобы изменить.`
-              : "Кликни, чтобы настроить подключение к GitHub/GitLab."}
+              ? `Active provider: ${LABELS[config!.provider]}. Click to change.`
+              : "Click to configure GitHub/GitLab connection."}
           </p>
         </TooltipContent>
       </Tooltip>

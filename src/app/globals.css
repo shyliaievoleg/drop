@@ -120,3 +120,27 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Dark-themed scrollbar for the code editor textarea (WebKit + Firefox). */
+.drop-code-textarea {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.62 0 0) oklch(0.18 0 0);
+}
+.drop-code-textarea::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+.drop-code-textarea::-webkit-scrollbar-track {
+  background: oklch(0.18 0 0);
+}
+.drop-code-textarea::-webkit-scrollbar-thumb {
+  background: oklch(0.58 0 0);
+  border-radius: 6px;
+  border: 3px solid oklch(0.18 0 0);
+}
+.drop-code-textarea::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.68 0 0);
+}
+.drop-code-textarea::-webkit-scrollbar-corner {
+  background: oklch(0.18 0 0);
+}

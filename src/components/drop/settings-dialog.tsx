@@ -81,27 +81,27 @@ export function SettingsDialog({ open, onOpenChange, onSaved }: SettingsDialogPr
     if (provider === "github") {
       const g = finalCfg.github
       if (!g.token || !g.owner || !g.repo) {
-        toast({ title: "Заполни token, owner и repo для GitHub", variant: "destructive" })
+        toast({ title: "Fill in token, owner and repo for GitHub", variant: "destructive" })
         return
       }
     } else {
       const gl = finalCfg.gitlab
       if (!gl.token || !gl.projectId) {
-        toast({ title: "Заполни token и project id для GitLab", variant: "destructive" })
+        toast({ title: "Fill in token and project id for GitLab", variant: "destructive" })
         return
       }
     }
     saveConfig(finalCfg)
     onSaved(finalCfg)
     onOpenChange(false)
-    toast({ title: "Настройки сохранены", description: `Активен: ${provider}` })
+    toast({ title: "Settings saved", description: `Active: ${provider}` })
   }
 
   function handleClear() {
     clearConfig()
     setDraft(DEFAULT_CONFIG)
     onSaved(DEFAULT_CONFIG)
-    toast({ title: "Настройки сброшены" })
+    toast({ title: "Settings reset" })
   }
 
   return (
@@ -109,11 +109,11 @@ export function SettingsDialog({ open, onOpenChange, onSaved }: SettingsDialogPr
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[560px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Settings2 className="h-5 w-5" /> Подключение к GitHub / GitLab
+            <Settings2 className="h-5 w-5" /> Connect to GitHub / GitLab
           </DialogTitle>
           <DialogDescription>
-            Настройки хранятся только в этом браузере (localStorage). Token не отправляется
-            ни на какой сервер — браузер сам ходит в API GitHub/GitLab.
+            Settings are stored only in this browser (localStorage). The token is never
+            sent to any server — the browser calls the GitHub/GitLab API directly.
           </DialogDescription>
         </DialogHeader>
 
@@ -126,7 +126,7 @@ export function SettingsDialog({ open, onOpenChange, onSaved }: SettingsDialogPr
           <TabsContent value="github" className="space-y-3 pt-3">
             <Field
               label="Personal Access Token"
-              hint="Fine-grained, Contents: Read & Write на репо experiments"
+              hint="Fine-grained, Contents: Read & Write on the experiments repo"
               type="password"
               value={draft.github.token}
               onChange={(v) => patchGithub("token", v)}
@@ -162,7 +162,7 @@ export function SettingsDialog({ open, onOpenChange, onSaved }: SettingsDialogPr
             </div>
             <Field
               label="Pages base URL (optional)"
-              hint="Кастомный домен; иначе https://{owner}.github.io/{repo}"
+              hint="Custom domain; otherwise https://{owner}.github.io/{repo}"
               value={draft.github.pagesBase}
               onChange={(v) => patchGithub("pagesBase", v)}
               placeholder="https://experiments.yourdomain.com"
@@ -172,7 +172,7 @@ export function SettingsDialog({ open, onOpenChange, onSaved }: SettingsDialogPr
           <TabsContent value="gitlab" className="space-y-3 pt-3">
             <Field
               label="Access Token"
-              hint="Scope: api на проекте"
+              hint="Scope: api on the project"
               type="password"
               value={draft.gitlab.token}
               onChange={(v) => patchGitlab("token", v)}
@@ -180,7 +180,7 @@ export function SettingsDialog({ open, onOpenChange, onSaved }: SettingsDialogPr
             />
             <Field
               label="Project ID"
-              hint="namespace/project или числовой id"
+              hint="namespace/project or numeric id"
               value={draft.gitlab.projectId}
               onChange={(v) => patchGitlab("projectId", v)}
               placeholder="your-group/experiments"
@@ -231,7 +231,7 @@ export function SettingsDialog({ open, onOpenChange, onSaved }: SettingsDialogPr
             )}
             <div className="min-w-0 flex-1">
               {testResult.ok ? (
-                <p>Подключено: <code className="font-mono">{testResult.label}</code></p>
+                <p>Connected: <code className="font-mono">{testResult.label}</code></p>
               ) : (
                 <p className="break-words">{testResult.error}</p>
               )}
@@ -241,22 +241,22 @@ export function SettingsDialog({ open, onOpenChange, onSaved }: SettingsDialogPr
 
         <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-between">
           <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={handleClear}>
-            <Trash2 className="h-4 w-4" /> Сбросить
+            <Trash2 className="h-4 w-4" /> Reset
           </Button>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={handleTest} disabled={testing} className="gap-1.5">
               {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
-              Проверить
+              Test
             </Button>
             <Button size="sm" onClick={handleSave}>
-              Сохранить
+              Save
             </Button>
           </div>
         </DialogFooter>
 
         <div className="flex items-center gap-1.5 border-t pt-3 text-[11px] text-muted-foreground">
           <Badge variant="outline" className="font-mono text-[10px]">localStorage</Badge>
-          <span>токен виден только JS этой страницы; используйте fine-grained PAT, scoped на один репо</span>
+          <span>the token is visible only to JS on this page; use a fine-grained PAT scoped to a single repo</span>
         </div>
       </DialogContent>
     </Dialog>

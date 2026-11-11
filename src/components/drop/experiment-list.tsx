@@ -51,17 +51,17 @@ export function ExperimentList({
 }: ExperimentListProps) {
   if (loading && experiments.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Загрузка из репозитория…
+      <div className="flex flex-1 min-h-0 items-center justify-center text-sm text-muted-foreground">
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading from repository…
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center">
+      <div className="flex flex-1 min-h-0 flex-col items-center justify-center gap-2 p-6 text-center">
         <AlertCircle className="h-8 w-8 text-destructive/60" />
-        <p className="text-sm font-medium text-destructive">Не удалось получить список</p>
+        <p className="text-sm font-medium text-destructive">Failed to load list</p>
         <p className="max-w-xs text-xs text-muted-foreground break-words">{error}</p>
       </div>
     )
@@ -69,18 +69,18 @@ export function ExperimentList({
 
   if (experiments.length === 0) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-2 p-8 text-center">
+      <div className="flex flex-1 min-h-0 flex-col items-center justify-center gap-2 p-8 text-center">
         <FileCode2 className="h-8 w-8 text-muted-foreground/50" />
-        <p className="text-sm font-medium">Репозиторий пуст</p>
+        <p className="text-sm font-medium">Repository is empty</p>
         <p className="text-xs text-muted-foreground">
-          Опубликуй первый эксперимент справа — он появится в репозитории и здесь.
+          Publish your first experiment on the right — it will appear in the repository and here.
         </p>
       </div>
     )
   }
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="flex-1 min-h-0 overflow-y-auto">
       <div className="space-y-2 p-3">
         {experiments.map((exp) => {
           const isActive = exp.slug === activeSlug
@@ -121,13 +121,13 @@ export function ExperimentList({
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   navigator.clipboard.writeText(exp.publicUrl)
-                                  toast({ title: "URL скопирован" })
+                                  toast({ title: "URL copied" })
                                 }}
                               >
                                 <Copy className="h-3.5 w-3.5" />
                               </Button>
                             </TooltipTrigger>
-                            <TooltipContent>Копировать URL</TooltipContent>
+                            <TooltipContent>Copy URL</TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                         <TooltipProvider delayDuration={200}>
@@ -145,7 +145,7 @@ export function ExperimentList({
                                 </a>
                               </Button>
                             </TooltipTrigger>
-                            <TooltipContent>Открыть</TooltipContent>
+                            <TooltipContent>Open</TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                       </div>
@@ -168,7 +168,7 @@ export function ExperimentList({
                             <Pencil className="h-3.5 w-3.5" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Редактировать</TooltipContent>
+                        <TooltipContent>Edit</TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                     <AlertDialog>
@@ -186,24 +186,24 @@ export function ExperimentList({
                               </Button>
                             </AlertDialogTrigger>
                           </TooltipTrigger>
-                          <TooltipContent>Удалить из репозитория</TooltipContent>
+                          <TooltipContent>Delete from repository</TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                       <AlertDialogContent onClick={(e) => e.stopPropagation()}>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Удалить «{exp.slug}»?</AlertDialogTitle>
+                          <AlertDialogTitle>Delete "{exp.slug}"?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Файл {exp.slug}/index.html будет удалён из репозитория коммитом.
-                            Встраивания на сайте перестанут работать, пока URL не уберут из DatoCMS.
+                            The file {exp.slug}/index.html will be deleted from the repository via a commit.
+                            Embeds on the site will stop working until the URL is removed from DatoCMS.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Отмена</AlertDialogCancel>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => onDelete(exp.slug, exp.sha)}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
-                            Удалить
+                            Delete
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>

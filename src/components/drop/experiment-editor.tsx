@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/hooks/use-toast"
 import { CodeEditor } from "./code-editor"
 import { LivePreview } from "./live-preview"
+import { SandboxFlagsPanel } from "./sandbox-flags"
 import {
   DATOCMS_LIMIT_BYTES,
   extractTitle,
@@ -20,12 +21,16 @@ import {
   slugify,
   getExperimentFull,
   putExperiment,
+  buildSandboxString,
+  loadSandboxFlags,
+  DEFAULT_SANDBOX_FLAGS,
   type ExperimentMeta,
+  type SandboxFlags,
   type StorageConfig,
 } from "@/lib/storage"
 
 const SAMPLE_HTML = `<!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -53,10 +58,10 @@ const SAMPLE_HTML = `<!doctype html>
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>Привет из Drop</h1>
-      <p>Самодостаточный фрагмент. Никаких внешних зависимостей.</p>
+      <h1>Hello from Drop</h1>
+      <p>Self-contained snippet. No external dependencies.</p>
       <div class="count" id="count">0</div>
-      <p style="margin-top:12px"><button id="b">Кликнуть</button></p>
+      <p style="margin-top:12px"><button id="b">Click me</button></p>
     </div>
   </div>
   <script>
@@ -89,6 +94,14 @@ export function ExperimentEditor({ initial, config, onPublished }: ExperimentEdi
   const [loadingContent, setLoadingContent] = useState(false)
   const [result, setResult] = useState<{ publicUrl: string; slug: string } | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [sandboxFlags, setSandboxFlags] = useState<SandboxFlags>(DEFAULT_SANDBOX_FLAGS)
+
+  // Load sandbox flags from localStorage once on mount.
+  useEffect(() => {
+    setSandboxFlags(loadSandboxFlags())
+  }, [])
+
+  const sandboxString = buildSandboxString(sandboxFlags)
 
   // Load full content when an experiment is selected.
   useEffect(() => {
@@ -138,15 +151,15 @@ export function ExperimentEditor({ initial, config, onPublished }: ExperimentEdi
 
   async function handlePublish() {
     if (!title.trim()) {
-      toast({ title: "Укажите заголовок", variant: "destructive" })
+      toast({ title: "Title is required", variant: "destructive" })
       return
     }
     if (!slugValid) {
-      toast({ title: "Slug некорректен", description: "Только строчные буквы, цифры и дефисы.", variant: "destructive" })
+      toast({ title: "Invalid slug", description: "Only lowercase letters, digits and hyphens.", variant: "destructive" })
       return
     }
     if (!html.trim()) {
-      toast({ title: "HTML пуст", variant: "destructive" })
+      toast({ title: "HTML is empty", variant: "destructive" })
       return
     }
     setPublishing(true)
@@ -157,21 +170,21 @@ export function ExperimentEditor({ initial, config, onPublished }: ExperimentEdi
       setSha(res.sha)
       setResult({ publicUrl: res.publicUrl, slug: effectiveSlug })
       toast({
-        title: "Опубликовано",
+        title: "Published",
         description: `${effectiveSlug} → ${config.provider}`,
       })
       onPublished(effectiveSlug, res.sha)
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       setError(message)
-      toast({ title: "Ошибка публикации", description: message, variant: "destructive" })
+      toast({ title: "Publish failed", description: message, variant: "destructive" })
     } finally {
       setPublishing(false)
     }
   }
 
   const embedSnippet = result?.publicUrl
-    ? `<iframe\n  src="${result.publicUrl}"\n  sandbox="allow-scripts allow-same-origin"\n  loading="lazy"\n  title="${result.slug}"\n  style="width:100%;border:0;min-height:420px"\n></iframe>`
+    ? `<iframe\n  src="${result.publicUrl}"\n  sandbox="${sandboxString}"\n  loading="lazy"\n  title="${result.slug}"\n  style="width:100%;border:0;min-height:420px"\n></iframe>`
     : ""
 
   const providerLabel = config.provider === "gitlab" ? "GitLab Pages" : "GitHub Pages"
@@ -181,12 +194,12 @@ export function ExperimentEditor({ initial, config, onPublished }: ExperimentEdi
       {/* Meta row */}
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
         <div className="min-w-0 space-y-1.5">
-          <Label htmlFor="exp-title" className="text-xs">Заголовок</Label>
+          <Label htmlFor="exp-title" className="text-xs">Title</Label>
           <Input
             id="exp-title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Например: Анимированный hero"
+            placeholder="e.g. Animated hero"
           />
         </div>
         <div className="min-w-0 space-y-1.5">
@@ -202,10 +215,10 @@ export function ExperimentEditor({ initial, config, onPublished }: ExperimentEdi
             className={`font-mono ${!slugValid && effectiveSlug ? "border-destructive focus-visible:ring-destructive" : ""}`}
           />
           {!slugValid && effectiveSlug ? (
-            <p className="text-[11px] text-destructive">только a-z, 0-9 и дефисы</p>
+            <p className="text-[11px] text-destructive">only a-z, 0-9 and hyphens</p>
           ) : (
             <p className="text-[11px] text-muted-foreground">
-              файл: <code className="font-mono">…/{effectiveSlug || "slug"}/index.html</code>
+              file: <code className="font-mono">…/{effectiveSlug || "slug"}/index.html</code>
             </p>
           )}
         </div>
@@ -216,11 +229,11 @@ export function ExperimentEditor({ initial, config, onPublished }: ExperimentEdi
         </div>
       </div>
 
-      {/* Editor + preview grid */}
-      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-2">
+      {/* Editor + preview grid — fixed height so the Publish button stays visible */}
+      <div className="grid h-[55vh] min-h-[380px] max-h-[620px] min-w-0 gap-4 lg:grid-cols-2">
         <Card className="min-w-0 flex min-h-0 flex-col overflow-hidden">
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-sm font-medium">Код фрагмента</CardTitle>
+            <CardTitle className="text-sm font-medium">Snippet code</CardTitle>
             <Button
               variant="ghost"
               size="sm"
@@ -233,14 +246,14 @@ export function ExperimentEditor({ initial, config, onPublished }: ExperimentEdi
                 setReloadToken((t) => t + 1)
               }}
             >
-              <Sparkles className="h-3.5 w-3.5" /> Пример
+              <Sparkles className="h-3.5 w-3.5" /> Sample
             </Button>
           </CardHeader>
           <CardContent className="min-h-0 flex-1 p-0">
             <div className="relative h-full">
               {loadingContent && (
                 <div className="absolute inset-0 z-10 flex items-center justify-center bg-zinc-950/80 text-zinc-300">
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Загрузка из репозитория…
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading from repository…
                 </div>
               )}
               <CodeEditor value={html} onChange={setHtml} />
@@ -249,9 +262,12 @@ export function ExperimentEditor({ initial, config, onPublished }: ExperimentEdi
         </Card>
 
         <div className="min-h-0 min-w-0">
-          <LivePreview html={html} reloadToken={reloadToken} />
+          <LivePreview html={html} sandbox={sandboxString} reloadToken={reloadToken} />
         </div>
       </div>
+
+      {/* Sandbox flags */}
+      <SandboxFlagsPanel flags={sandboxFlags} onChange={setSandboxFlags} />
 
       {/* Publish bar */}
       <Card className="min-w-0 overflow-hidden">
@@ -260,15 +276,15 @@ export function ExperimentEditor({ initial, config, onPublished }: ExperimentEdi
             <Badge variant="outline" className="font-mono">{formatBytes(bytes)}</Badge>
             {bytes > DATOCMS_LIMIT_BYTES ? (
               <span className="text-amber-600 dark:text-amber-400">
-                &gt; 300KB — через DatoCMS HTML-поле не пройдёт, через iframe работает
+                &gt; 300KB — won't fit DatoCMS HTML field, works via iframe
               </span>
             ) : (
-              <span>в рамках лимита DatoCMS 300KB</span>
+              <span>within DatoCMS 300KB limit</span>
             )}
           </div>
           <Button onClick={handlePublish} disabled={publishing || loadingContent} className="gap-2">
             {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
-            {publishing ? "Публикуем…" : initial ? "Обновить" : "Опубликовать"}
+            {publishing ? "Publishing…" : initial ? "Update" : "Publish"}
           </Button>
         </CardContent>
       </Card>
@@ -292,12 +308,12 @@ export function ExperimentEditor({ initial, config, onPublished }: ExperimentEdi
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">Опубликовано</p>
+                <p className="text-sm font-medium">Published</p>
                 <p className="truncate font-mono text-xs text-muted-foreground">{result.publicUrl}</p>
               </div>
               <Button variant="outline" size="sm" className="gap-1.5" asChild>
                 <a href={result.publicUrl} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-3.5 w-3.5" /> Открыть
+                  <ExternalLink className="h-3.5 w-3.5" /> Open
                 </a>
               </Button>
             </div>
@@ -305,22 +321,22 @@ export function ExperimentEditor({ initial, config, onPublished }: ExperimentEdi
             <Separator />
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label className="text-xs">Embed-сниппет для DatoCMS</Label>
+                <Label className="text-xs">Embed snippet for DatoCMS</Label>
                 <Button
                   variant="ghost"
                   size="sm"
                   className="h-7 gap-1.5 text-xs"
                   onClick={() => {
                     navigator.clipboard.writeText(embedSnippet)
-                    toast({ title: "Сниппет скопирован" })
+                    toast({ title: "Snippet copied" })
                   }}
                 >
-                  <Copy className="h-3.5 w-3.5" /> Копировать
+                  <Copy className="h-3.5 w-3.5" /> Copy
                 </Button>
               </div>
               <Textarea readOnly value={embedSnippet} className="font-mono text-xs" rows={6} />
               <p className="text-[11px] text-muted-foreground">
-                Вставьте этот URL в блок <code className="font-mono">ExperimentEmbed</code> в DatoCMS.
+                Paste this URL into the <code className="font-mono">ExperimentEmbed</code> block in DatoCMS.
               </p>
             </div>
           </CardContent>

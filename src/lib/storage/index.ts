@@ -62,3 +62,12 @@ export {
   extractTitle,
 } from "./types"
 export { loadConfig, saveConfig, clearConfig, isConfigured, activeProviderConfig, DEFAULT_CONFIG } from "./config"
+export {
+  type SandboxFlags,
+  DEFAULT_SANDBOX_FLAGS,
+  SANDBOX_FLAG_META,
+  loadSandboxFlags,
+  saveSandboxFlags,
+  buildSandboxString,
+  countActiveFlags,
+} from "./sandbox"
