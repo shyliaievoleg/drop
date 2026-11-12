@@ -57,3 +57,7 @@ server.log
 # local SQLite database (regenerated via `bun run db:push`)
 db/*.db
 db/*.db-journal
+
+# scaffold / sandbox leftovers — not part of the Drop app
+examples/
+download/

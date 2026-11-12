@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   keywords: ["DatoCMS", "GitHub Pages", "GitLab Pages", "iframe embed", "designer workflow"],
   authors: [{ name: "Drop" }],
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: "https://www.datocms-assets.com/22695/1790690955-color-palette-icon.png",
   },
 };
 
