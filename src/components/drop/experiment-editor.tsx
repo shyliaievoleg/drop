@@ -184,7 +184,7 @@ export function ExperimentEditor({ initial, config, onPublished }: ExperimentEdi
   }
 
   const embedSnippet = result?.publicUrl
-    ? `<iframe\n  src="${result.publicUrl}"\n  sandbox="${sandboxString}"\n  loading="lazy"\n  title="${result.slug}"\n  style="width:100%;border:0;min-height:420px"\n></iframe>`
+    ? `<iframe\n  src="${result.publicUrl}"\n  sandbox="${sandboxString}"\n  loading="lazy"\n  title="${result.slug}"\n  style="width:100%;border:0;min-height:720px"\n></iframe>`
     : ""
 
   const providerLabel = config.provider === "gitlab" ? "GitLab Pages" : "GitHub Pages"
